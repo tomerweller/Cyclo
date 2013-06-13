@@ -1,15 +1,38 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
               android:orientation="vertical"
               android:layout_width="fill_parent"
               android:layout_height="fill_parent"
         >
+
     <TextView
-            android:layout_width="fill_parent"
+            android:id="@+id/speedLabel"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="CYCLO"
-            android:textSize="50sp"
+            android:layout_alignParentTop="true"
+            android:layout_alignParentRight="true"
+            android:text="30km/h"
+            android:textSize="30sp"
             />
 
-</LinearLayout>
+    <TextView
+            android:id="@+id/timerLabel"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentRight="true"
+            android:layout_below="@id/speedLabel"
+            android:text="14:20"
+            android:textSize="30sp"
+            />
 
+    <TextView
+            android:id="@+id/distanceLabel"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentRight="true"
+            android:layout_below="@id/timerLabel"
+            android:text="8km"
+            android:textSize="30sp"
+            />
+
+</RelativeLayout>
