@@ -11,6 +11,8 @@ import android.view.View;
 import android.view.WindowManager;
 import android.widget.TextView;
 
+import java.util.List;
+
 public class MainActivity extends Activity implements LocationListener{
     private static final String TAG = "CYCLO";
     private LocationManager mLocationManager;
@@ -29,6 +31,7 @@ public class MainActivity extends Activity implements LocationListener{
             updateTimer();
         }
     };
+    private GraphView mGraph;
 
     private void updateTimer(){
         long timer = System.currentTimeMillis() - startTime;
@@ -51,8 +54,13 @@ public class MainActivity extends Activity implements LocationListener{
         mTimerLabel = (TextView)findViewById(R.id.timerLabel);
         mSpeedLabel = (TextView)findViewById(R.id.speedLabel);
         mDistanceLabel = (TextView)findViewById(R.id.distanceLabel);
+        mGraph = (GraphView)findViewById(R.id.graph);
         mHandler = new Handler();
         isStarted = false;
+
+        mGraph.setMeasurementCount(300);
+        mGraph.setLowerBound(0.0f);
+        mGraph.setUpperBound(0.0f);
 
         View rootView = findViewById(android.R.id.content);
         rootView.setOnClickListener(new View.OnClickListener() {
@@ -61,6 +69,12 @@ public class MainActivity extends Activity implements LocationListener{
                 if (!isStarted) onBegin();
             }
         });
+
+        List<Location> realPoints = GPXParser.getPoints(this, "gpxfile.xml", false);
+        for(Location l : realPoints){
+            Log.d(TAG, l.toString());
+            mGraph.addValueToPlan((l.getSpeed()));
+        }
 
         onBegin();
     }

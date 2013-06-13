@@ -1,5 +1,4 @@
-package cyclo.gpxparser;
-
+package com.ubi.cyclo;
 
 import java.util.ArrayList;
 
@@ -8,6 +7,7 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.RectF;
+import android.util.AttributeSet;
 import android.view.View;
 
 public class GraphView extends View{
@@ -23,8 +23,8 @@ public class GraphView extends View{
 	private ArrayList<Float> dataListPlan = null;
 	private ArrayList<Float> dataListLive = null;
 	
-    public GraphView(Context context) {
-        super(context);
+    public GraphView(Context context, AttributeSet attrs) {
+        super(context, attrs);
 		
         dataListPlan = new ArrayList<Float>();
         dataListLive = new ArrayList<Float>();
@@ -37,7 +37,7 @@ public class GraphView extends View{
 		paint.setAntiAlias(true);
     }
 
-	@Override
+    @Override
 	public void onDraw(Canvas canvas) {	
 	
 		float width = viewWidth;

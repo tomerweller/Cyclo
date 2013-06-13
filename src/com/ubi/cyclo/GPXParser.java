@@ -1,5 +1,4 @@
-package cyclo.gpxparser;
-
+package com.ubi.cyclo;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -39,8 +38,7 @@ private static final SimpleDateFormat gpxDate = new SimpleDateFormat("yyyy-MM-dd
 public static List<Location> getPoints(Context myContext, String gpxFileName, boolean fakeTheValues)
 {
     List<Location> points = null;
-    try
-    {
+    try{
         DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
         DocumentBuilder builder = factory.newDocumentBuilder();
   

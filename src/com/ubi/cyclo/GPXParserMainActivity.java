@@ -1,5 +1,4 @@
-package cyclo.gpxparser;
-
+package com.ubi.cyclo;
 
 import java.util.List;
 
@@ -10,7 +9,7 @@ import android.view.Menu;
 
 import android.location.Location;
 
-public class MainActivity extends Activity {
+public class GPXParserMainActivity extends Activity {
 
 	private GraphView graphView = null;
 	
@@ -22,7 +21,7 @@ public class MainActivity extends Activity {
 		//setContentView(R.layout.activity_main);
 		
 		if (graphView == null) {
-        	graphView = new GraphView(this);
+        	graphView = new GraphView(this, null);
         	
         	
         	graphView.setMeasurementCount(300);
@@ -33,14 +32,6 @@ public class MainActivity extends Activity {
         }
 	}
 
-	@Override
-	public boolean onCreateOptionsMenu(Menu menu) {
-		// Inflate the menu; this adds items to the action bar if it is present.
-		getMenuInflater().inflate(R.menu.main, menu);
-		return true;
-	}
-	
-	
 	public void onResume(){
 		super.onResume();
 		      
