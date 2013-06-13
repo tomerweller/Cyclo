@@ -16,6 +16,10 @@ public class MainActivity extends Activity implements LocationListener{
     private LocationManager mLocationManager;
     private long startTime;
     private TextView mTimerLabel;
+    private TextView mSpeedLabel;
+    private TextView mDistanceLabel;
+
+    private MockLocationHandler mMockLocationHandler;
     private Handler mHandler;
     private boolean isStarted;
 
@@ -41,10 +45,15 @@ public class MainActivity extends Activity implements LocationListener{
         super.onCreate(savedInstanceState);
         setContentView(R.layout.cyclo_main);
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+
+        mMockLocationHandler = new MockLocationHandler(this, this);
+        mLocationManager = (LocationManager)getSystemService(LOCATION_SERVICE);
+        mTimerLabel = (TextView)findViewById(R.id.timerLabel);
+        mSpeedLabel = (TextView)findViewById(R.id.speedLabel);
+        mDistanceLabel = (TextView)findViewById(R.id.distanceLabel);
         mHandler = new Handler();
         isStarted = false;
 
-        mTimerLabel = (TextView)findViewById(R.id.timerLabel);
         View rootView = findViewById(android.R.id.content);
         rootView.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -52,15 +61,18 @@ public class MainActivity extends Activity implements LocationListener{
                 if (!isStarted) onBegin();
             }
         });
+
+        onBegin();
     }
 
     private void onBegin(){
         Log.d(TAG, "onBegin()");
         isStarted=true;
         startTime = System.currentTimeMillis();
-//        mLocationManager = (LocationManager)getSystemService(LOCATION_SERVICE);
-//        mLocationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, this);
-        new MockLocationHandler(this, this).start();
+
+        mLocationManager = (LocationManager)getSystemService(LOCATION_SERVICE);
+        mLocationManager.requestLocationUpdates(MockLocationHandler.PROVIDER, 0, 0, this);
+        mMockLocationHandler.start();
         updateTimer();
     }
 
@@ -73,6 +85,7 @@ public class MainActivity extends Activity implements LocationListener{
     @Override
     public void onLocationChanged(Location location) {
         Log.d(TAG, "Location Update:" + location);
+        mSpeedLabel.setText(location.getSpeed()+"km/h");
     }
 
     @Override
