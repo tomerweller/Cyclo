@@ -72,12 +72,12 @@ public static List<Location> getPoints(Context myContext, String gpxFileName, bo
             double realAlt = 0;
             
             if( fakeTheValues == false ){
-            	pt = new Location("cycloReal");
+            	pt = new Location(MockLocationHandler.PROVIDER);
             	pt.setLatitude(realLat);
             	pt.setLongitude(realLon);
             }
             else{ //add small noise to location
-            	pt = new Location("cycloFake");
+            	pt = new Location(MockLocationHandler.PROVIDER);
             	pt.setLatitude(realLat + (rnd.nextDouble()-0.5)*2.0/1e6); 
             	pt.setLongitude(realLon + (rnd.nextDouble()-0.5)*2.0/1e6);        
             }

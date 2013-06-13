@@ -48,9 +48,11 @@ public class MockLocationHandler {
         location2.setLongitude(10);
         location2.setSpeed(50);
         location2.setTime(10000);
-        mockLocations = new ArrayList<Location>();
-        mockLocations.add(location1);
-        mockLocations.add(location2);
+
+        mockLocations = GPXParser.getPoints(mContext, "gpxfile.xml", true);
+//        mockLocations = new ArrayList<Location>();
+//        mockLocations.add(location1);
+//        mockLocations.add(location2);
     }
 
     private Runnable mockLocationRunnable = new Runnable() {

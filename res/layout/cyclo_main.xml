@@ -5,29 +5,20 @@
               android:layout_height="fill_parent"
         >
 
-    <ImageView
-            android:id="@+id/notificationImage"
-            android:layout_height="wrap_content"
-            android:layout_width="wrap_content"
-            android:layout_alignParentLeft="true"
-            android:layout_alignParentTop="true"
-            android:src="@drawable/eat"
-
-            />
 
     <com.ubi.cyclo.GraphView
             android:id="@+id/graph"
-            android:layout_height="wrap_content"
-            android:layout_width="wrap_content"
-            android:layout_below="@id/notificationImage"
+            android:layout_height="250px"
+            android:layout_width="match_parent"
             />
 
     <TextView
             android:id="@+id/speedLabel"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_alignParentTop="true"
-            android:layout_alignParentRight="true"
+            android:layout_alignParentBottom="true"
+            android:layout_alignParentLeft="true"
+            android:gravity="right"
             android:text="30km/h"
             android:textSize="30sp"
             />
@@ -36,8 +27,8 @@
             android:id="@+id/timerLabel"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_alignParentRight="true"
-            android:layout_below="@id/speedLabel"
+            android:layout_alignParentBottom="true"
+            android:layout_centerInParent="true"
             android:text="14:20"
             android:textSize="30sp"
             />
@@ -46,10 +37,11 @@
             android:id="@+id/distanceLabel"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_alignParentBottom="true"
             android:layout_alignParentRight="true"
-            android:layout_below="@id/timerLabel"
             android:text="8km"
             android:textSize="30sp"
+            android:gravity="left"
             />
 
 </RelativeLayout>

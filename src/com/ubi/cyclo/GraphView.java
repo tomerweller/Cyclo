@@ -51,7 +51,7 @@ public class GraphView extends View{
 		
 		// Draw the title
 		paint.setTextSize(20);
-		canvas.drawText("Overview", (width / 2) - 60, 30, paint);
+//		canvas.drawText("Overview", (width / 2) - 60, 30, paint);
 		paint.setTextSize(12);
 		
 		// Draw the x and y axes
