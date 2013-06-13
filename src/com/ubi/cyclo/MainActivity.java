@@ -1,20 +1,28 @@
 package com.ubi.cyclo;
 
 import android.app.Activity;
+import android.app.PendingIntent;
+import android.content.BroadcastReceiver;
+import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
 import android.os.Bundle;
 import android.os.Handler;
 import android.util.Log;
-import android.view.View;
 import android.view.WindowManager;
 import android.widget.TextView;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class MainActivity extends Activity implements LocationListener{
     private static final String TAG = "CYCLO";
+    private static final String POI_ACTION = "com.ubi.cyclo.POI";
+    public static final String POI_ID_EXTRA = "POI_ID_EXTRA";
+
     private LocationManager mLocationManager;
     private long mStartTime;
     private TextView mTimerLabel;
@@ -24,8 +32,9 @@ public class MainActivity extends Activity implements LocationListener{
     private MockLocationHandler mMockLocationHandler;
     private Handler mHandler;
     private long mDistance;
-    private boolean mIsStarted;
+    private boolean mIsOn;
     private Location mLastLocation;
+    private List<POI> mPOIs;
 
     private Runnable timerUpdater = new Runnable() {
         @Override
@@ -37,7 +46,13 @@ public class MainActivity extends Activity implements LocationListener{
 
     private void updateTimer(){
         long timer = System.currentTimeMillis() - mStartTime;
-        mTimerLabel.setText((int)(timer/1000)+"s");
+        int minutes = (int)timer/(1000*60);
+        int seconds = (int)(timer%(1000*60))/1000;
+
+        String minutesStr = minutes<10? "0"+minutes : minutes+"";
+        String secondsStr = seconds<10? "0"+seconds : seconds+"";
+
+        mTimerLabel.setText(minutesStr+":"+secondsStr);
         mHandler.postDelayed(timerUpdater, 1000);
     }
 
@@ -51,26 +66,18 @@ public class MainActivity extends Activity implements LocationListener{
         setContentView(R.layout.cyclo_main);
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
 
-        mMockLocationHandler = new MockLocationHandler(this, this);
+        mMockLocationHandler = new MockLocationHandler(this);
         mLocationManager = (LocationManager)getSystemService(LOCATION_SERVICE);
         mTimerLabel = (TextView)findViewById(R.id.timerLabel);
         mSpeedLabel = (TextView)findViewById(R.id.speedLabel);
         mDistanceLabel = (TextView)findViewById(R.id.distanceLabel);
         mGraph = (GraphView)findViewById(R.id.graph);
         mHandler = new Handler();
-        mIsStarted = false;
+        mIsOn = false;
 
         mGraph.setMeasurementCount(300);
         mGraph.setLowerBound(0.0f);
         mGraph.setUpperBound(0.0f);
-
-        View rootView = findViewById(android.R.id.content);
-        rootView.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                if (!mIsStarted) onBegin();
-            }
-        });
 
         List<Location> realPoints = GPXParser.getPoints(this, "gpxfile.xml", false);
         for(Location l : realPoints){
@@ -81,11 +88,37 @@ public class MainActivity extends Activity implements LocationListener{
         onBegin();
     }
 
+
+    private void initPois(){
+        int pendingIntentId = 100;
+
+        mPOIs = new ArrayList<POI>();
+        mPOIs.add(new POI(0,0,R.drawable.eat));
+        mPOIs.add(new POI(0,0,R.drawable.eat));
+        mPOIs.add(new POI(0,0,R.drawable.eat));
+        mPOIs.add(new POI(0,0,R.drawable.eat));
+        mPOIs.add(new POI(0,0,R.drawable.eat));
+        mPOIs.add(new POI(0,0,R.drawable.eat));
+
+        for (POI poi : mPOIs){
+            Intent intent = new Intent(POI_ACTION);
+            intent.putExtra(POI_ID_EXTRA, poi.getImgId());
+            PendingIntent pendingIntent = PendingIntent.getBroadcast(this, pendingIntentId++,
+                    intent, PendingIntent.FLAG_ONE_SHOT);
+            mLocationManager.addProximityAlert(poi.getLatitude(), poi.getLongitude(), 50, -1,
+                    pendingIntent);
+        }
+
+    }
+
+
     private void onBegin(){
         Log.d(TAG, "onBegin()");
-        mIsStarted =true;
+        mIsOn =true;
         mDistance =0;
         mStartTime = System.currentTimeMillis();
+
+        initPois();;
 
         mLocationManager = (LocationManager)getSystemService(LOCATION_SERVICE);
         mLocationManager.requestLocationUpdates(MockLocationHandler.PROVIDER, 0, 0, this);
@@ -102,7 +135,7 @@ public class MainActivity extends Activity implements LocationListener{
     @Override
     public void onLocationChanged(Location location) {
         Log.d(TAG, "Location Update:" + location);
-        mSpeedLabel.setText((int)location.getSpeed()+"m/s");
+        mSpeedLabel.setText((int)location.getSpeed()+"km/h");
 
         if (mLastLocation!=null){
             mDistance+=location.distanceTo(mLastLocation);
@@ -122,5 +155,24 @@ public class MainActivity extends Activity implements LocationListener{
     @Override
     public void onProviderDisabled(String s) {}
 
+    BroadcastReceiver mPoiReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            Intent poiActivityIntent = new Intent(context, PoiActivity.class);
+            poiActivityIntent.putExtras(intent);
+            startActivity(poiActivityIntent);
+        }
+    };
 
+    @Override
+    protected void onResume() {
+        super.onResume();
+        registerReceiver(mPoiReceiver, new IntentFilter(POI_ACTION));
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        unregisterReceiver(mPoiReceiver);
+    }
 }
