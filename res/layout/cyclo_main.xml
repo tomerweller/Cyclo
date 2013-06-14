@@ -3,12 +3,13 @@
               android:orientation="vertical"
               android:layout_width="fill_parent"
               android:layout_height="fill_parent"
+              android:padding="40px"
         >
 
 
     <com.ubi.cyclo.GraphView
             android:id="@+id/graph"
-            android:layout_height="250px"
+            android:layout_height="240px"
             android:layout_width="match_parent"
             />
 
@@ -20,7 +21,8 @@
             android:layout_alignParentLeft="true"
             android:gravity="right"
             android:text="30km/h"
-            android:textSize="30sp"
+            android:textSize="30px"
+            android:fontFamily="sans_serif_light"
             />
 
     <TextView
@@ -30,7 +32,8 @@
             android:layout_alignParentBottom="true"
             android:layout_centerInParent="true"
             android:text="14:20"
-            android:textSize="30sp"
+            android:textSize="30px"
+            android:fontFamily="sans_serif_light"
             />
 
     <TextView
@@ -40,8 +43,9 @@
             android:layout_alignParentBottom="true"
             android:layout_alignParentRight="true"
             android:text="8km"
-            android:textSize="30sp"
+            android:textSize="30px"
             android:gravity="left"
+            android:fontFamily="sans_serif_light"
             />
 
 </RelativeLayout>

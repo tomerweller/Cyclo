@@ -12,6 +12,9 @@ import android.location.LocationManager;
 import android.os.Bundle;
 import android.os.Handler;
 import android.util.Log;
+import android.view.KeyEvent;
+import android.view.MotionEvent;
+import android.view.View;
 import android.view.WindowManager;
 import android.widget.TextView;
 
@@ -93,19 +96,14 @@ public class MainActivity extends Activity implements LocationListener{
         int pendingIntentId = 100;
 
         mPOIs = new ArrayList<POI>();
-        mPOIs.add(new POI(0,0,R.drawable.eat));
-        mPOIs.add(new POI(0,0,R.drawable.eat));
-        mPOIs.add(new POI(0,0,R.drawable.eat));
-        mPOIs.add(new POI(0,0,R.drawable.eat));
-        mPOIs.add(new POI(0,0,R.drawable.eat));
-        mPOIs.add(new POI(0,0,R.drawable.eat));
+        mPOIs.add(new POI(65.02848052978516, 25.42107582092285, R.drawable.eat));
 
         for (POI poi : mPOIs){
             Intent intent = new Intent(POI_ACTION);
             intent.putExtra(POI_ID_EXTRA, poi.getImgId());
             PendingIntent pendingIntent = PendingIntent.getBroadcast(this, pendingIntentId++,
-                    intent, PendingIntent.FLAG_ONE_SHOT);
-            mLocationManager.addProximityAlert(poi.getLatitude(), poi.getLongitude(), 50, -1,
+                    intent, PendingIntent.FLAG_UPDATE_CURRENT);
+            mLocationManager.addProximityAlert(poi.getLatitude(), poi.getLongitude(), 20, -1,
                     pendingIntent);
         }
 
@@ -158,6 +156,7 @@ public class MainActivity extends Activity implements LocationListener{
     BroadcastReceiver mPoiReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
+            Log.d(TAG, "POI" + intent.getIntExtra(POI_ID_EXTRA, 0));
             Intent poiActivityIntent = new Intent(context, PoiActivity.class);
             poiActivityIntent.putExtras(intent);
             startActivity(poiActivityIntent);
@@ -175,4 +174,8 @@ public class MainActivity extends Activity implements LocationListener{
         super.onPause();
         unregisterReceiver(mPoiReceiver);
     }
+
+
+
+
 }

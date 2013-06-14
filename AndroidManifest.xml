@@ -20,7 +20,8 @@
                 <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
         </activity>
-        <activity android:name=".PoiActivity"/>
+        <activity android:name=".PoiActivity"
+                  android:theme="@android:style/Theme.Black.NoTitleBar.Fullscreen"/>
     </application>
 
 
