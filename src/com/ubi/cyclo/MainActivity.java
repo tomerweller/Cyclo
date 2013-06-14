@@ -12,9 +12,6 @@ import android.location.LocationManager;
 import android.os.Bundle;
 import android.os.Handler;
 import android.util.Log;
-import android.view.KeyEvent;
-import android.view.MotionEvent;
-import android.view.View;
 import android.view.WindowManager;
 import android.widget.TextView;
 
@@ -45,7 +42,7 @@ public class MainActivity extends Activity implements LocationListener{
             updateTimer();
         }
     };
-    private GraphView mGraph;
+    private OldGraphView mGraph;
 
     private void updateTimer(){
         long timer = System.currentTimeMillis() - mStartTime;
@@ -74,7 +71,7 @@ public class MainActivity extends Activity implements LocationListener{
         mTimerLabel = (TextView)findViewById(R.id.timerLabel);
         mSpeedLabel = (TextView)findViewById(R.id.speedLabel);
         mDistanceLabel = (TextView)findViewById(R.id.distanceLabel);
-        mGraph = (GraphView)findViewById(R.id.graph);
+        mGraph = (OldGraphView)findViewById(R.id.graph);
         mHandler = new Handler();
         mIsOn = false;
 
@@ -82,7 +79,7 @@ public class MainActivity extends Activity implements LocationListener{
         mGraph.setLowerBound(0.0f);
         mGraph.setUpperBound(0.0f);
 
-        List<Location> realPoints = GPXParser.getPoints(this, "gpxfile.xml", false);
+        List<Location> realPoints = OldGPXParser.getPoints(this, "gpxfile.xml", false);
         for(Location l : realPoints){
             Log.d(TAG, l.toString());
             mGraph.addValueToPlan((l.getSpeed()));

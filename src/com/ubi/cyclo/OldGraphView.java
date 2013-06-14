@@ -10,7 +10,7 @@ import android.graphics.RectF;
 import android.util.AttributeSet;
 import android.view.View;
 
-public class GraphView extends View{
+public class OldGraphView extends View{
 
 	private int measurementCount = 0;
 	private float upperBound = 0.0f;
@@ -23,7 +23,7 @@ public class GraphView extends View{
 	private ArrayList<Float> dataListPlan = null;
 	private ArrayList<Float> dataListLive = null;
 	
-    public GraphView(Context context, AttributeSet attrs) {
+    public OldGraphView(Context context, AttributeSet attrs) {
         super(context, attrs);
 		
         dataListPlan = new ArrayList<Float>();

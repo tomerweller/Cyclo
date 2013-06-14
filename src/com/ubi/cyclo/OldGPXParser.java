@@ -31,7 +31,7 @@ import android.location.Location;
 import android.util.Log;
 
 
-public class GPXParser
+public class OldGPXParser
 {
 private static final SimpleDateFormat gpxDate = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'");
 
@@ -190,7 +190,7 @@ import org.xmlpull.v1.XmlPullParserException;
 
 import android.util.Xml;
 
-public class GPXParser {
+public class OldGPXParser {
 	
 	    // We don't use namespaces
 	    private static final String ns = null;

@@ -30,7 +30,7 @@ public class MockLocationHandler {
         mHandler = new Handler();
         currentMockIndex = 0;
 
-        mockLocations = GPXParser.getPoints(mContext, "gpxfile.xml", true);
+        mockLocations = OldGPXParser.getPoints(mContext, "gpxfile.xml", true);
     }
 
     private Runnable mockLocationRunnable = new Runnable() {
