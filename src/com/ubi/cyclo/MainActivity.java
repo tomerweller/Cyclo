@@ -6,6 +6,7 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.graphics.Color;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
@@ -13,7 +14,12 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.util.Log;
 import android.view.WindowManager;
+import android.widget.FrameLayout;
 import android.widget.TextView;
+
+import com.jjoe64.graphview.CycloGraphView;
+import com.jjoe64.graphview.GraphView;
+import com.jjoe64.graphview.GraphViewSeries;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -42,7 +48,9 @@ public class MainActivity extends Activity implements LocationListener{
             updateTimer();
         }
     };
-    private OldGraphView mGraph;
+    private CycloGraphView mGraph;
+    private FrameLayout mGraphContainer;
+    private RunningAverageFilter mFilter;
 
     private void updateTimer(){
         long timer = System.currentTimeMillis() - mStartTime;
@@ -52,7 +60,8 @@ public class MainActivity extends Activity implements LocationListener{
         String minutesStr = minutes<10? "0"+minutes : minutes+"";
         String secondsStr = seconds<10? "0"+seconds : seconds+"";
 
-        mTimerLabel.setText(minutesStr+":"+secondsStr);
+        mTimerLabel.setText(minutesStr+":"+secondsStr + "(+0:05)");
+        mTimerLabel.setTextColor(Color.GREEN);
         mHandler.postDelayed(timerUpdater, 1000);
     }
 
@@ -71,19 +80,61 @@ public class MainActivity extends Activity implements LocationListener{
         mTimerLabel = (TextView)findViewById(R.id.timerLabel);
         mSpeedLabel = (TextView)findViewById(R.id.speedLabel);
         mDistanceLabel = (TextView)findViewById(R.id.distanceLabel);
-        mGraph = (OldGraphView)findViewById(R.id.graph);
         mHandler = new Handler();
         mIsOn = false;
 
-        mGraph.setMeasurementCount(300);
-        mGraph.setLowerBound(0.0f);
-        mGraph.setUpperBound(0.0f);
+//        mGraph = (OldGraphView)findViewById(R.id.graph);
+//        mGraph.setMeasurementCount(300);
+//        mGraph.setLowerBound(0.0f);
+//        mGraph.setUpperBound(0.0f);
+//        List<Location> realPoints = OldGPXParser.getPoints(this, "gpxfile.xml", false);
+//        for(Location l : realPoints){
+//            Log.d(TAG, l.toString());
+//            mGraph.addValueToPlan((l.getSpeed()));
+//        }
 
-        List<Location> realPoints = OldGPXParser.getPoints(this, "gpxfile.xml", false);
-        for(Location l : realPoints){
-            Log.d(TAG, l.toString());
-            mGraph.addValueToPlan((l.getSpeed()));
+        mPastLocations = new ArrayList<Location>();
+
+        mGraphContainer = (FrameLayout)findViewById(R.id.graph);
+        mGraph = new CycloGraphView(this,"");
+        mGraphContainer.addView(mGraph);
+        mGraph.setShowLegend(false);
+        mGraph.setDrawBackground(true);
+        mGraph.setBackgroundColor(Color.BLACK);
+
+
+        mFilter = new RunningAverageFilter(25);
+
+        // add real data
+        List<Location> realPoints =
+                GPXParser.getPoints(this, "nallicruise.gpx", false);
+        GraphView.GraphViewData[] realData = new GraphView.GraphViewData[realPoints.size()];
+        if (realPoints.size() == 0){Log.e(TAG, "no points were read!");	return; }
+
+        double sumFromStart = 0;
+        Location prevPoint = null;
+
+        for(int i = 0; i< realPoints.size(); i++){
+            if(prevPoint == null)
+                prevPoint = realPoints.get(i);
+
+            double distFromPrevPoint = realPoints.get(i).distanceTo(prevPoint);
+            sumFromStart += distFromPrevPoint;
+
+            //double distFromStart = (double) realPoints.get(i).distanceTo( realPoints.get(0) );
+            double altitude = realPoints.get(i).getAltitude();
+            double filt_altitude = mFilter.filter(altitude);
+            //realData[i] = new GraphView.GraphViewData(distFromStart, filt_altitude);
+            realData[i] = new GraphView.GraphViewData(sumFromStart, filt_altitude);
+
+            prevPoint = realPoints.get(i);
+
+
         }
+
+        GraphViewSeries.GraphViewSeriesStyle realStyle =
+                new GraphViewSeries.GraphViewSeriesStyle(Color.DKGRAY, 3, Color.DKGRAY, false);
+        mGraph.addSeries(new GraphViewSeries("", realStyle, realData));
 
         onBegin();
     }
@@ -113,12 +164,15 @@ public class MainActivity extends Activity implements LocationListener{
         mDistance =0;
         mStartTime = System.currentTimeMillis();
 
-        initPois();;
+        initPois();
 
         mLocationManager = (LocationManager)getSystemService(LOCATION_SERVICE);
         mLocationManager.requestLocationUpdates(MockLocationHandler.PROVIDER, 0, 0, this);
         mMockLocationHandler.start();
         updateTimer();
+       testMock2(30);
+//        mGraph.removeSeries(1);
+        testMock1(35);
     }
 
     @Override
@@ -126,6 +180,9 @@ public class MainActivity extends Activity implements LocationListener{
 //        mLocationManager.removeUpdates(this);
         super.onDestroy();
     }
+
+
+    List<Location> mPastLocations;
 
     @Override
     public void onLocationChanged(Location location) {
@@ -137,8 +194,104 @@ public class MainActivity extends Activity implements LocationListener{
             mDistanceLabel.setText(mDistance+"m");
         }
 
+        if (mPastLocations.size()>1){
+            runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    mGraph.removeSeries(1);
+                    testMock1(mPastLocations.size());
+                    mGraph.invalidate();
+                }
+            });
+
+        }
+
+//            mGraph.removeSeries(1);
+//
+        mPastLocations.add(location);
         mLastLocation = location;
 
+
+
+
+//        GraphView.GraphViewData[] locationSeries = new GraphView.GraphViewData[mPastLocations.size()];
+//
+//        for(int i = 0; i<locationSeries.length; i++){
+//            double distanceFromStart = (double)mPastLocations.get(i).distanceTo(mPastLocations.get(0));
+//            double altitude = mPastLocations.get(i).getAltitude();
+//            double filtAltitude = mFilter.filter(altitude);
+//            locationSeries[i] = new GraphView.GraphViewData(distanceFromStart, filtAltitude);
+//        }
+//
+//        GraphViewSeries.GraphViewSeriesStyle seriesStyle =
+//                new GraphViewSeries.GraphViewSeriesStyle(0xFFFFBB33, 3, 0xFFFFBB33, false);
+//
+//
+//        mGraph.addSeries(new GraphViewSeries("", seriesStyle, locationSeries));
+//
+//        mGraph.invalidate();
+
+    }
+
+    private void testMock1(int size){
+
+        List<Location> fakePoints = GPXParser.getPoints(this, "nallicruise.gpx", false);
+
+        mFilter.reset();
+
+        GraphView.GraphViewData[] fakeData = new GraphView.GraphViewData[size];
+        if (fakePoints.size() == 0){Log.e(TAG, "no points were read!");	return; }
+
+        double sumFromStart = 0;
+        Location prevPoint = null;
+
+        for(int i = 0; i<size; i++){
+            if(prevPoint == null)
+                prevPoint = fakePoints.get(i);
+
+            double distFromPrevPoint = fakePoints.get(i).distanceTo(prevPoint);
+            sumFromStart += distFromPrevPoint;
+
+            //double distFromStart = (double) fakePoints.get(i).distanceTo( fakePoints.get(0) );
+            double altitude = fakePoints.get(i).getAltitude();
+            double filt_altitude = mFilter.filter(altitude);
+            //fakeData[i] = new GraphView.GraphViewData(distFromStart, filt_altitude);
+            fakeData[i] = new GraphView.GraphViewData(sumFromStart, filt_altitude);
+
+            prevPoint = fakePoints.get(i);
+        }
+        GraphViewSeries.GraphViewSeriesStyle fakeStyle = new GraphViewSeries.GraphViewSeriesStyle(0xFFFFBB33, 3, 0xFFFFBB33, false);
+        mGraph.addSeries(new GraphViewSeries("", fakeStyle, fakeData));
+    }
+
+    private void testMock2(int size){
+        List<Location> fakePoints = GPXParser.getPoints(this, "nallicruise.gpx", false);
+
+        mFilter.reset();
+
+        GraphView.GraphViewData[] fakeData = new GraphView.GraphViewData[size];
+        if (fakePoints.size() == 0){Log.e(TAG, "no points were read!");	return; }
+
+        double sumFromStart = 0;
+        Location prevPoint = null;
+
+        for(int i = 0; i<size; i++){
+            if(prevPoint == null)
+                prevPoint = fakePoints.get(i);
+
+            double distFromPrevPoint = fakePoints.get(i).distanceTo(prevPoint);
+            sumFromStart += distFromPrevPoint;
+
+            //double distFromStart = (double) fakePoints.get(i).distanceTo( fakePoints.get(0) );
+            double altitude = fakePoints.get(i).getAltitude();
+            double filt_altitude = mFilter.filter(altitude);
+            //fakeData[i] = new GraphView.GraphViewData(distFromStart, filt_altitude);
+            fakeData[i] = new GraphView.GraphViewData(sumFromStart, filt_altitude);
+
+            prevPoint = fakePoints.get(i);
+        }
+        GraphViewSeries.GraphViewSeriesStyle fakeStyle = new GraphViewSeries.GraphViewSeriesStyle(Color.GRAY, 3, Color.GRAY, false);
+        mGraph.addSeries(new GraphViewSeries("", fakeStyle, fakeData));
     }
 
     @Override
@@ -154,9 +307,11 @@ public class MainActivity extends Activity implements LocationListener{
         @Override
         public void onReceive(Context context, Intent intent) {
             Log.d(TAG, "POI" + intent.getIntExtra(POI_ID_EXTRA, 0));
-            Intent poiActivityIntent = new Intent(context, PoiActivity.class);
+            Intent poiActivityIntent = new Intent(context, DummyActivity.class);
             poiActivityIntent.putExtras(intent);
             startActivity(poiActivityIntent);
+
+            Dummy.class;
         }
     };
 
